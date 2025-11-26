@@ -50,6 +50,20 @@ fi
 # ディレクトリ作成
 mkdir -p "$INSTALL_DIR"/{bin,frontend,data,logs,scripts}
 
+# 既存インストールチェック
+if [ -f "$INSTALL_DIR/bin/lmlight-api" ]; then
+    info "既存のインストールを検出しました。アップデート中..."
+
+    # 既存プロセス停止
+    info "既存のプロセスを停止中..."
+    [ -f "$INSTALL_DIR/logs/web.pid" ] && kill $(cat "$INSTALL_DIR/logs/web.pid") 2>/dev/null || true
+    [ -f "$INSTALL_DIR/logs/api.pid" ] && kill $(cat "$INSTALL_DIR/logs/api.pid") 2>/dev/null || true
+    lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+    lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+    sleep 1
+    success "既存のプロセスを停止しました"
+fi
+
 # ============================================================
 # ステップ 1: バイナリダウンロード
 # ============================================================
@@ -413,6 +427,30 @@ chmod +x "$INSTALL_DIR/scripts/stop.sh"
 # シンボリックリンク作成
 ln -sf "$INSTALL_DIR/scripts/start.sh" "$INSTALL_DIR/start.sh"
 ln -sf "$INSTALL_DIR/scripts/stop.sh" "$INSTALL_DIR/stop.sh"
+
+# ============================================================
+# デスクトップエントリ作成
+# ============================================================
+info "デスクトップショートカットを作成中..."
+
+DESKTOP_DIR="$HOME/.local/share/applications"
+mkdir -p "$DESKTOP_DIR"
+
+cat > "$DESKTOP_DIR/lmlight.desktop" << EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=LM Light
+Comment=Lightweight LLM Management Tool
+Exec=$INSTALL_DIR/start.sh
+Icon=utilities-terminal
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=true
+EOF
+
+chmod +x "$DESKTOP_DIR/lmlight.desktop"
+success "デスクトップショートカットを作成しました: ~/.local/share/applications/lmlight.desktop"
 
 echo ""
 echo -e "${GREEN}╔═══════════════════════════════════════════════════════╗${NC}"
