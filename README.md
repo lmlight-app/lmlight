@@ -35,24 +35,46 @@ docker run -d --name lmlight-api -p 8000:8000 --env-file .env lmlight-api
 docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 ```
 
-## 環境構築
+## 環境構築 (インストール前に実行)
 
 ### 必要な依存関係
 
-| 依存関係 | macOS | Linux (Ubuntu/Debian) |
-|---------|-------|----------------------|
-| Node.js 18+ | `brew install node` | `sudo apt install nodejs` |
-| PostgreSQL 16+ | `brew install postgresql@16` | `sudo apt install postgresql` |
-| Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` |
+| 依存関係 | macOS | Linux (Ubuntu/Debian) | Windows |
+|---------|-------|----------------------|---------|
+| Node.js 18+ | `brew install node` | `sudo apt install nodejs npm` | `winget install OpenJS.NodeJS.LTS` |
+| PostgreSQL 16+ | `brew install postgresql@16` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL` |
+| pgvector | `brew install pgvector` | `sudo apt install postgresql-16-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
+| Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
 
-### データベース起動
+### サービス起動
 
 ```bash
-brew services start postgresql@16  # macOS
-sudo systemctl start postgresql    # Linux
+# macOS
+brew services start postgresql@16
+
+# Linux
+sudo systemctl start postgresql && sudo systemctl enable postgresql
+
+# Windows (管理者権限)
+net start postgresql-x64-16
 ```
 
-※ DB/ユーザー作成は初回起動時にPrismaが自動実行
+※ データベース・ユーザー・テーブル作成はインストーラーが自動実行します
+
+### 手動DBセットアップ (開発・トラブルシュート用)
+
+```bash
+cd web
+
+# Prismaクライアント生成
+npx prisma generate
+
+# スキーマをDBに反映
+npx prisma db push
+
+# 初期データ投入 (admin@local / admin123)
+npx prisma db seed
+```
 
 ### Ollamaモデル
 

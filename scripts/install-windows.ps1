@@ -452,6 +452,29 @@ if ($MISSING_DEPS.Count -gt 0) {
     Write-Host ""
 }
 
+# Create Start Menu shortcuts (path is consistent across all locales)
+$START_MENU = [Environment]::GetFolderPath("Programs")
+$APP_FOLDER = "$START_MENU\LM Light"
+New-Item -ItemType Directory -Force -Path $APP_FOLDER | Out-Null
+
+$WshShell = New-Object -ComObject WScript.Shell
+
+$StartShortcut = $WshShell.CreateShortcut("$APP_FOLDER\LM Light Start.lnk")
+$StartShortcut.TargetPath = "powershell.exe"
+$StartShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$INSTALL_DIR\start.ps1`""
+$StartShortcut.WorkingDirectory = $INSTALL_DIR
+$StartShortcut.Description = "Start LM Light"
+$StartShortcut.Save()
+
+$StopShortcut = $WshShell.CreateShortcut("$APP_FOLDER\LM Light Stop.lnk")
+$StopShortcut.TargetPath = "powershell.exe"
+$StopShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$INSTALL_DIR\stop.ps1`""
+$StopShortcut.WorkingDirectory = $INSTALL_DIR
+$StopShortcut.Description = "Stop LM Light"
+$StopShortcut.Save()
+
+Write-Success "スタートメニューにショートカットを作成しました"
+
 Write-Host "起動: $INSTALL_DIR\start.ps1" -ForegroundColor Blue
 Write-Host "停止: $INSTALL_DIR\stop.ps1" -ForegroundColor Blue
 Write-Host ""
