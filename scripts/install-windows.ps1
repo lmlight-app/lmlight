@@ -284,7 +284,7 @@ EXCEPTION WHEN duplicate_object THEN null; END `$`$;
 INSERT INTO "User" ("id", "email", "name", "password", "role", "status", "updatedAt")
 VALUES (
     'admin-user-id',
-    'admin@localhost.local',
+    'admin@local',
     'Admin',
     '`$2b`$12`$km3AGocYrvN44g4bE6F1.ujXVXrLhSg0BIH1ccvjTHD5cEPATJGXi',
     'ADMIN',
@@ -342,13 +342,13 @@ $NEXTAUTH_SECRET = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32
 $ENV_CONTENT = @"
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
 OLLAMA_BASE_URL=http://localhost:11434
+LICENSE_FILE_PATH=$INSTALL_DIR\license.lic
 NEXTAUTH_SECRET=$NEXTAUTH_SECRET
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 "@
 
 Set-Content -Path "$INSTALL_DIR\.env" -Value $ENV_CONTENT -Encoding UTF8
-Copy-Item "$INSTALL_DIR\.env" "$INSTALL_DIR\frontend\.env"
 Write-Success ".env ファイルを作成しました"
 
 # 起動スクリプト作成
@@ -410,7 +410,7 @@ Write-Host ""
 Write-Host "  Web UI: http://localhost:3000"
 Write-Host "  API:    http://localhost:8000"
 Write-Host ""
-Write-Host "  ログイン: admin@localhost.local / admin123"
+Write-Host "  ログイン: admin@local / admin123"
 Write-Host ""
 
 # ブラウザを開く
@@ -479,7 +479,7 @@ Write-Host "起動: $INSTALL_DIR\start.ps1" -ForegroundColor Blue
 Write-Host "停止: $INSTALL_DIR\stop.ps1" -ForegroundColor Blue
 Write-Host ""
 Write-Host "Web UI:   http://localhost:3000" -ForegroundColor Blue
-Write-Host "ログイン: admin@localhost.local / admin123" -ForegroundColor Blue
+Write-Host "ログイン: admin@local / admin123" -ForegroundColor Blue
 Write-Host ""
 Write-Host "============================================================"
 Write-Host "  ライセンス設定"

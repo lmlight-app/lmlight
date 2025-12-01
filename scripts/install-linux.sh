@@ -21,7 +21,7 @@ rm -rf "$INSTALL_DIR/web" && mkdir -p "$INSTALL_DIR/web"
 tar -xzf "/tmp/lmlight-web.tar.gz" -C "$INSTALL_DIR/web"
 rm -f /tmp/lmlight-web.tar.gz
 
-[ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << 'EOF'
+[ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << EOF
 # LM Light Configuration
 
 # PostgreSQL
@@ -30,8 +30,8 @@ DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
 # Ollama
 OLLAMA_BASE_URL=http://localhost:11434
 
-# License
-LICENSE_PATH=./license.lic
+# License (absolute path for Nuitka binary)
+LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
 
 # NextAuth
 NEXTAUTH_SECRET=randomsecret123
@@ -196,30 +196,38 @@ fi
 cat > "$INSTALL_DIR/start.sh" << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
-[ -f .env ] && { set -a; source .env; set +a; }
+set -a; [ -f .env ] && source .env; set +a
+
+# Check dependencies
 command -v node &>/dev/null || { echo "❌ Node.js not found"; exit 1; }
 pg_isready -q 2>/dev/null || { echo "❌ PostgreSQL not running"; exit 1; }
-pgrep -x "ollama" >/dev/null || { echo "Starting Ollama..."; ollama serve >/dev/null 2>&1 & sleep 2; }
-fuser -k ${API_PORT:-8000}/tcp 2>/dev/null || true
-fuser -k ${WEB_PORT:-3000}/tcp 2>/dev/null || true
-mkdir -p logs
-ROOT="$(pwd)"
-nohup ./api > logs/api.log 2>&1 & echo $! > logs/api.pid
-cd web && nohup node server.js > "$ROOT/logs/web.log" 2>&1 & echo $! > "$ROOT/logs/web.pid"
-echo "LM Light Started:"
-echo "  API: http://localhost:${API_PORT:-8000}"
-echo "  Web: http://localhost:${WEB_PORT:-3000}"
+pgrep -x ollama >/dev/null || { ollama serve &>/dev/null & sleep 2; }
+
+# Stop existing
+pkill -f "lmlight.*api" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
+
+echo "🚀 Starting LM Light..."
+
+# Start API
+./api &
+API_PID=$!
+
+# Start Web
+cd web && node server.js &
+WEB_PID=$!
+
+echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
+echo "   Press Ctrl+C to stop"
+
+trap "kill $API_PID $WEB_PID 2>/dev/null; echo 'Stopped'" EXIT
+wait
 EOF
 chmod +x "$INSTALL_DIR/start.sh"
 
 cat > "$INSTALL_DIR/stop.sh" << 'EOF'
 #!/bin/bash
-cd "$(dirname "$0")"
-[ -f .env ] && source .env
-[ -f logs/web.pid ] && kill $(cat logs/web.pid) 2>/dev/null
-[ -f logs/api.pid ] && kill $(cat logs/api.pid) 2>/dev/null
-rm -f logs/*.pid
-lsof -ti:${WEB_PORT:-3000},${API_PORT:-8000} 2>/dev/null | xargs kill -9 2>/dev/null || true
+pkill -f "lmlight.*api" 2>/dev/null
+pkill -f "node.*server.js" 2>/dev/null
 echo "Stopped"
 EOF
 chmod +x "$INSTALL_DIR/stop.sh"
