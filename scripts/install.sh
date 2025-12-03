@@ -38,7 +38,7 @@ DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
 OLLAMA_BASE_URL=http://localhost:11434
 
 # License
-LICENSE_PATH=./license.lic
+LICENSE_FILE_PATH=./license.lic
 
 # NextAuth
 NEXTAUTH_SECRET=randomsecret123

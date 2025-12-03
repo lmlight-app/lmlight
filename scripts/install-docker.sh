@@ -103,7 +103,7 @@ DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 
 # License
-LICENSE_PATH=/app/license.lic
+LICENSE_FILE_PATH=/app/license.lic
 
 # NextAuth
 NEXTAUTH_SECRET=randomsecret123
