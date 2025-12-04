@@ -1,4 +1,7 @@
-# LM Light 利用マニュアル(Nuikta版)
+# LM Light 利用マニュアル (Nuitka版)
+
+> **Note**: Nuitkaビルドは一部環境で問題が発生する場合があります。
+> 推奨: [PyInstaller版 (dist_v2)](https://github.com/lmlight-app/dist_v2) をご利用ください。
 
 ## インストール
 
